@@ -16,6 +16,9 @@ M.FLIP = "flip"
 M.CLEAR_ALL_ACTIONS = "clear_all_actions"
 M.MOUSE_LEFT_BUTTON = "mouse_left_button"
 
+-- Rotation pools
+M.ROTATION_ORDER_START = "rotation_order_start"
+
 M.cursor = {
 	tile_source_url = "/game/cursor/cursor.tilesource",
 	tile_map_url = "/transportation/transportation#transportation",
@@ -28,6 +31,7 @@ M.state = {
 	building_type = "none",
 	building_layer = "none",
 	rotation_frame = 1,
+	rotation_pool = M.ROTATION_ORDER_START,
 	direction = "right",
 }
 
@@ -107,52 +111,50 @@ M.tilemaps = {
 		},
 		tiles = {
 			up = {
-				up		= {start = 9,	finish = 12},
-				right	= {start = 13,	finish = 16},
-				left 	= {start = 37,	finish = 40},
-				direction = 1,
+				up		= {is_corner = false,	start = 9,	finish = 12},
+				right	= {is_corner = true,	start = 13,	finish = 16},
+				left 	= {is_corner = true,	start = 37,	finish = 40},
 			},
 			right = {
-				right	= {start = 17,	finish = 20},
-				down	= {start = 45,	finish = 48},
-				up		= {start = 21,	finish = 24},
-				direction = 1,
+				right	= {is_corner = false,	start = 17,	finish = 20},
+				down	= {is_corner = true,	start = 45,	finish = 48},
+				up		= {is_corner = true,	start = 21,	finish = 24},
 			},
 			down = {
-				down	= {start = 1,	finish = 4},
-				left	= {start = 53,	finish = 56},
-				right	= {start = 29,	finish = 32},
-				direction = -1,
+				down	= {is_corner = false,	start = 1,	finish = 4},
+				left	= {is_corner = true,	start = 53,	finish = 56},
+				right	= {is_corner = true,	start = 29,	finish = 32},
 			},
 			left = {
-				left	= {start = 25,	finish = 28},
-				up		= {start = 61,	finish = 64},
-				down	= {start = 5,	finish = 8},
-				direction = -1,
+				left	= {is_corner = false,	start = 25,	finish = 28},
+				up		= {is_corner = true,	start = 61,	finish = 64},
+				down	= {is_corner = true,	start = 5,	finish = 8},
 			},
 			none = {
 				none 	= {start = 0,	finish = 0},
 			},
 			rotation = {
 				right = {
-					{is_corner = false,	direction = "up",		direction_start = "up"},
-					{is_corner = true,	direction = "right",	direction_start = "up"},
-					{is_corner = false,	direction = "right",	direction_start = "right"},
-					{is_corner = true,	direction = "down",		direction_start = "right"},
-					{is_corner = false, direction = "down",		direction_start = "down"},
-					{is_corner = true,	direction = "left",		direction_start = "down"},
-					{is_corner = false, direction = "left",		direction_start = "left"},
-					{is_corner = true,	direction = "up",		direction_start = "right"},
+					--rotation_order_start = {"up_up", "right_up", "right_right", "down_right", "down_down", "left_down", "left_left", "up_right"},
+					up_up		= {is_corner = false,	direction = "up",		direction_start = "up"},
+					right_up	= {is_corner = true,	direction = "right",	direction_start = "up"},
+					right_right = {is_corner = false,	direction = "right",	direction_start = "right"},
+					down_right	= {is_corner = true,	direction = "down",		direction_start = "right"},
+					down_down	= {is_corner = false,	direction = "down",		direction_start = "down"},
+					left_down	= {is_corner = true,	direction = "left",		direction_start = "down"},
+					left_left	= {is_corner = false,	direction = "left",		direction_start = "left"},
+					up_right	= {is_corner = true,	direction = "up",		direction_start = "right"},
 				},
 				left = {
-					{is_corner = false,	direction = "up",		direction_start = "up"},
-					{is_corner = true,	direction = "left",		direction_start = "up"},
-					{is_corner = false,	direction = "left",		direction_start = "left"},
-					{is_corner = true,	direction = "down",		direction_start = "left"},
-					{is_corner = false, direction = "down",		direction_start = "down"},
-					{is_corner = true,	direction = "right",	direction_start = "down"},
-					{is_corner = false, direction = "right",	direction_start = "right"},
-					{is_corner = true,	direction = "up",		direction_start = "left"},
+					--rotation_order_start = {"up_up", "left_up", "left_left", "down_left", "down_down", "right_down", "right_right", "up_left"},
+					up_up 		= {is_corner = false,	direction = "up",		direction_start = "up"},
+					left_up 	= {is_corner = true,	direction = "left",		direction_start = "up"},
+					left_left	= {is_corner = false,	direction = "left",		direction_start = "left"},
+					down_left 	= {is_corner = true,	direction = "down",		direction_start = "left"},
+					down_down 	= {is_corner = false, 	direction = "down",		direction_start = "down"},
+					right_down 	= {is_corner = true,	direction = "right",	direction_start = "down"},
+					right_right = {is_corner = false, 	direction = "right",	direction_start = "right"},
+					up_left 	= {is_corner = true,	direction = "up",		direction_start = "left"},
 				},
 			},
 			animation = {
@@ -181,6 +183,10 @@ function M.tile_information(tile)
 	end
 
 	return nil
+end
+
+function M.get_available_connections(the_map, direction)
+	return M.tilemaps[the_map].tiles[direction]
 end
 
 function M.set_tiles_building_grid()
