@@ -1,0 +1,20 @@
+key_trigger {
+  input: KEY_B
+  action: "build_belt"
+}
+key_trigger {
+  input: KEY_ESC
+  action: "clear_all_actions"
+}
+key_trigger {
+  input: KEY_R
+  action: "rotate"
+}
+key_trigger {
+  input: KEY_LSHIFT
+  action: "flip"
+}
+mouse_trigger {
+  input: MOUSE_BUTTON_1
+  action: "mouse_left_button"
+}

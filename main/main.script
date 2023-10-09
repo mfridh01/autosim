@@ -1,0 +1,164 @@
+local world = require "main.world"
+local cell = require "main.cell"
+
+local function set_tilemap(self, the_map)
+	print("Setting tilemap")
+	local short_tilemap = world.tilemaps[the_map]
+	local size_x, size_y, width, height = tilemap.get_bounds(short_tilemap.url)
+
+	short_tilemap.size = {
+		x = size_x,
+		y = size_y,
+		width = width,
+		height = height,
+	}
+end
+
+local function set_cells(self, the_map)
+	print("Setting cells")
+	local short_tilemap = world.tilemaps[the_map]
+
+	for tilemap_layer in pairs(short_tilemap.layers) do
+		local layer = short_tilemap.layers[tilemap_layer]
+		short_tilemap.grid[layer] = {}
+		for i = short_tilemap.size.x, short_tilemap.size.width do
+			short_tilemap.grid[layer][i] = {}
+			for j = short_tilemap.size.y, short_tilemap.size.height do
+				local current_tile = tilemap.get_tile(short_tilemap.url, layer, i, j)
+				local direction = {start = "none", finish = "none"}
+				local tile = {start = 0, finish = 0}
+				local name = short_tilemap.name
+				local is_targetable = short_tilemap.is_targetable
+				local is_showing_cursor = short_tilemap.is_showing_cursor
+				local is_destroyable = false
+
+				if layer == "belts" then
+					if current_tile == 1 then direction = {start = "down", finish = "down"}
+					elseif current_tile == 5 then direction = {start = "down", finish = "left"}
+					elseif current_tile == 9 then direction = {start = "up", finish = "up"}
+					elseif current_tile == 13 then direction = {start = "right", finish = "up"}
+					elseif current_tile == 17 then direction = {start = "right", finish = "right"}
+					elseif current_tile == 21 then direction = {start = "up", finish = "right"}
+					elseif current_tile == 25 then direction = {start = "left", finish = "left"}
+					elseif current_tile == 29 then direction = {start = "right", finish = "down"}
+					elseif current_tile == 37 then direction = {start = "left", finish = "up"}
+					elseif current_tile == 45 then direction = {start = "down", finish = "right"}
+					elseif current_tile == 53 then direction = {start = "left", finish = "down"}
+					elseif current_tile == 61 then direction = {start = "up", finish = "left"}
+					end
+				end
+
+				short_tilemap.grid[layer][i][j] = cell.new(name, the_map, layer, current_tile, {start = direction.start, finish = direction.finish}, {x = i, y = j}, is_destroyable, is_targetable, is_showing_cursor)
+			end
+		end
+	end
+end
+
+local function set_animation_tiles(self, the_map)
+	print("Setting animation tiles")
+	local short_tilemap = world.tilemaps[the_map]
+
+	for layer in pairs(short_tilemap.grid) do
+		for i = short_tilemap.size.x, short_tilemap.size.width do
+			for j = short_tilemap.size.y, short_tilemap.size.height do
+				local current_tile = short_tilemap.grid[layer][i][j].tile
+
+				if current_tile ~= 0 then
+					local current_cell = short_tilemap.grid[layer][i][j]
+					current_cell:set_animation_tiles()
+				end
+			end
+		end
+	end
+end
+
+function init(self)
+	print("loading")
+	set_tilemap(self, world.TILEMAPS_WORLD)
+	set_tilemap(self, world.TILEMAPS_TRANSPORTATION_BELT_YELLOW)
+	set_tilemap(self, world.TILEMAPS_BUILDING_GRID)
+	
+	set_cells(self, world.TILEMAPS_WORLD)
+	set_cells(self, world.TILEMAPS_TRANSPORTATION_BELT_YELLOW)
+	
+	set_animation_tiles(self, world.TILEMAPS_TRANSPORTATION_BELT_YELLOW)
+
+	msg.post("/gui#loading_screen", "disable")
+end
+
+function final(self)
+-- Add finalization code here
+-- Learn more: https://defold.com/manuals/script/
+-- Remove this function if not needed
+end
+
+local function animate_cells(self, dt, the_map)
+	local short_tilemap = world.tilemaps[the_map]
+	-- Return if not animated
+	if not short_tilemap.is_animated then return end
+
+	local cell_animation = short_tilemap.tiles.animation
+	
+	cell_animation.frame_delay_current = cell_animation.frame_delay_current + 1
+
+	if cell_animation.frame_delay_current > cell_animation.frame_delay - 1 then
+		cell_animation.frame_current = cell_animation.frame_current + 1
+
+		if cell_animation.frame_current > cell_animation.frames then
+			cell_animation.frame_current = 1
+		end
+	
+		for layer in pairs(short_tilemap.grid) do
+			for i = short_tilemap.size.x, short_tilemap.size.width do
+				for j = short_tilemap.size.y, short_tilemap.size.height do
+					local single_cell = short_tilemap.grid[layer][i][j]
+
+					if single_cell.tile ~= 0 then
+						local cell_position = single_cell.position
+
+						tilemap.set_tile(world.tilemaps[the_map].url, single_cell.layer, cell_position.x, cell_position.y, (single_cell.animation.frame_start - 1) + cell_animation.frame_current)
+					end
+				end
+			end
+		end
+
+		cell_animation.frame_delay_current = 0
+	end
+end
+
+function update(self, dt)
+	animate_cells(self, dt, "transportation_belt_yellow")
+end
+
+function fixed_update(self, dt)
+-- This function is called if 'Fixed Update Frequency' is enabled in the Engine section of game.project
+-- Can be coupled with fixed updates of the physics simulation if 'Use Fixed Timestep' is enabled in
+-- Physics section of game.project
+-- Add update code here
+-- Learn more: https://defold.com/manuals/script/
+-- Remove this function if not needed
+end
+
+function on_message(self, message_id, message, sender)
+-- Add message-handling code here
+-- Learn more: https://defold.com/manuals/message-passing/
+-- Remove this function if not needed
+end
+
+function on_input(self, action_id, action)
+-- Add input-handling code here. The game object this script is attached to
+-- must have acquired input focus:
+--
+--    msg.post(".", "acquire_input_focus")
+--
+-- All mapped input bindings will be received. Mouse and touch input will
+-- be received regardless of where on the screen it happened.
+-- Learn more: https://defold.com/manuals/input/
+-- Remove this function if not needed
+end
+
+function on_reload(self)
+-- Add reload-handling code here
+-- Learn more: https://defold.com/manuals/hot-reload/
+-- Remove this function if not needed
+end

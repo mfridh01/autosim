@@ -1,0 +1,119 @@
+image: "/assets/tilemaps/yellow_belts_32x32_tilemap.png"
+tile_width: 32
+tile_height: 32
+tile_margin: 0
+tile_spacing: 2
+collision: ""
+material_tag: "tile"
+collision_groups: "default"
+animations {
+  id: "down_down"
+  start_tile: 1
+  end_tile: 1
+  playback: PLAYBACK_NONE
+  fps: 30
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "down_left"
+  start_tile: 53
+  end_tile: 53
+  playback: PLAYBACK_NONE
+  fps: 30
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "down_right"
+  start_tile: 29
+  end_tile: 29
+  playback: PLAYBACK_NONE
+  fps: 30
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "left_down"
+  start_tile: 5
+  end_tile: 5
+  playback: PLAYBACK_NONE
+  fps: 30
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "left_left"
+  start_tile: 25
+  end_tile: 25
+  playback: PLAYBACK_NONE
+  fps: 30
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "left_up"
+  start_tile: 61
+  end_tile: 61
+  playback: PLAYBACK_NONE
+  fps: 30
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "right_down"
+  start_tile: 45
+  end_tile: 45
+  playback: PLAYBACK_NONE
+  fps: 30
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "right_right"
+  start_tile: 17
+  end_tile: 17
+  playback: PLAYBACK_NONE
+  fps: 30
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "right_up"
+  start_tile: 21
+  end_tile: 21
+  playback: PLAYBACK_NONE
+  fps: 30
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "up_left"
+  start_tile: 37
+  end_tile: 37
+  playback: PLAYBACK_NONE
+  fps: 30
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "up_right"
+  start_tile: 13
+  end_tile: 13
+  playback: PLAYBACK_NONE
+  fps: 30
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "up_up"
+  start_tile: 9
+  end_tile: 9
+  playback: PLAYBACK_NONE
+  fps: 30
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+extrude_borders: 2
+inner_padding: 0
+sprite_trim_mode: SPRITE_TRIM_MODE_OFF

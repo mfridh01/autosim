@@ -1,0 +1,161 @@
+go.property("tile_source_cursor", resource.tile_source("/game/cursor/cursor.tilesource"))
+go.property("tile_source_transportation_belt_yellow", resource.tile_source("/game/transportation/transportation.tilesource"))
+
+world = require "main.world"
+
+local function get_tile_information(self)
+	self.cell = world.tile_information(self.position_tile)
+	msg.post(world.guis.tile_information.url, "update_tile_information", self.cell)
+end
+
+local function set_cursor_position(self)
+	get_tile_information(self)
+
+	if world.state.is_building then
+		go.set("#sprite", "image", self.tile_source_transportation_belt_yellow)
+	else 
+		go.set("#sprite", "image", self.tile_source_cursor)
+	end
+
+	go.set_position(self.position)
+end
+
+local function clear_all_actions(self)
+	world.state.is_building = false
+	world.state.building_type = "none"
+end
+
+local function build_on_cursor(self)
+	if not world.state.is_building then return end
+
+	local short_tilemap = world.tilemaps[world.state.building_type]
+	local layer = world.state.building_layer
+	local tilemap_rotations = short_tilemap.tiles.rotation[world.state.direction]
+	local current_rotation = tilemap_rotations[world.state.rotation_frame]
+
+	local current_cell = short_tilemap.grid[layer][self.position_tile.x][self.position_tile.y]
+	
+	current_cell.tile = short_tilemap.tiles[current_rotation.direction][current_rotation.direction_start].start
+	current_cell.direction.start = current_rotation.direction_start
+	current_cell.direction.finish = current_rotation.direction
+	current_cell.is_destroyable, current_cell.is_targetable, current_cell.is_showing_cursor = true
+	current_cell:set_animation_tiles()
+	pprint(current_cell.direction)
+end
+
+local function rotate_on_cursor(self)
+	if not world.state.is_building then return end
+
+	local direction = world.state.direction
+	local sprite_rotations = world.tilemaps[world.state.building_type].tiles.rotation[direction]
+	local last_rotation_frame = table.maxn(sprite_rotations)
+
+	if not world.state.is_flipping then
+		if world.state.rotation_frame == last_rotation_frame then
+			world.state.rotation_frame = 1
+		else
+			world.state.rotation_frame = world.state.rotation_frame + 1
+		end
+	end
+
+	local current_rotation = sprite_rotations[world.state.rotation_frame]	
+	local sprite_animation = current_rotation.direction .. "_" .. current_rotation.direction_start
+	msg.post("#sprite", "play_animation", {id = hash(sprite_animation)})
+end
+
+function init(self)
+	msg.post(".", "acquire_input_focus")
+	self.hidden = vmath.vector3(-40, -40, 0)
+	self.position_tile = vmath.vector3(-1, -1, 0)
+	self.new_position_tile = self.position_tile
+	self.position = vmath.vector3(0, 0, 0)
+	self.cell = {}
+	self.is_building = false
+end
+
+function final(self)
+	-- Add finalization code here
+	-- Learn more: https://defold.com/manuals/script/
+	-- Remove this function if not needed
+end
+
+function update(self, dt)
+	set_cursor_position(self)
+end
+
+function fixed_update(self, dt)
+	-- This function is called if 'Fixed Update Frequency' is enabled in the Engine section of game.project
+	-- Can be coupled with fixed updates of the physics simulation if 'Use Fixed Timestep' is enabled in
+	-- Physics section of game.project
+	-- Add update code here
+	-- Learn more: https://defold.com/manuals/script/
+	-- Remove this function if not needed
+end
+
+function on_message(self, message_id, message, sender)
+	-- Add message-handling code here
+	-- Learn more: https://defold.com/manuals/message-passing/
+	-- Remove this function if not needed
+end
+
+function on_input(self, action_id, action)
+	if action.x and action.y then
+		-- let game object follow mouse/touch movement
+		local pos = vmath.vector3(action.x, action.y, 0)
+		self.new_position_tile = world.world_to_tile(pos, 32)
+
+		if self.new_position_tile ~= self.position_tile then
+			self.position = vmath.vector3(((self.new_position_tile.x - 1) * 32) + (32 / 2), ((self.new_position_tile.y - 1) * 32) + (32 / 2), 0)
+			self.position_tile = self.new_position_tile
+		end
+	end
+
+	if action_id == hash(world.MOUSE_LEFT_BUTTON) then 
+		if action.pressed then
+			world.state.is_dragging = true
+			build_on_cursor(self)
+		elseif action.released then
+			world.state.is_dragging = false
+		end
+	end
+
+	if action_id == hash(world.BUILD_BELT) and action.pressed then
+		if world.state.is_building then
+			clear_all_actions(self)
+		else
+			world.state.is_building = true
+			world.state.building_type = world.TILEMAPS_TRANSPORTATION_BELT_YELLOW
+			world.state.building_layer = "belts"
+			world.state.rotation = 1
+		end
+	end
+
+	if action_id == hash(world.FLIP) then
+		if action.pressed then
+			world.state.is_flipping = true
+		elseif action.released then
+			world.state.is_flipping = false
+		end
+	end
+
+	if action_id == hash(world.ROTATE) and action.pressed then
+		if world.state.is_flipping then
+			if world.state.direction == "right" then
+				world.state.direction = "left"
+			elseif world.state.direction == "left" then
+				world.state.direction = "right"
+			end
+		end
+		rotate_on_cursor(self)
+	end
+
+	if action_id == hash(world.CLEAR_ALL_ACTIONS) then
+		clear_all_actions(self)
+	end
+end
+
+function on_reload(self)
+	-- Add reload-handling code here
+	-- Learn more: https://defold.com/manuals/hot-reload/
+	-- Remove this function if not needed
+end
