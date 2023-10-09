@@ -7,11 +7,17 @@ local function get_tilemap(self, the_map)
 	return world.tilemaps[the_map]
 end
 
+local function set_rotation_pool(self)
+	world.state.rotation_pool = world.get_available_rotations(world.state.building_type, world.state.direction)
+	pprint(world.state.rotation_pool)
+end
+
 local function get_rotation_frame(self)
 	local direction = world.state.direction
-	local sprite_rotations = world.tilemaps[world.state.building_type].tiles.rotation[direction][rotation_pool]
-	local current_rotation = sprite_rotations[world.state.rotation_frame]
-
+	local current_rotation_frame = world.state.rotation_pool[world.state.rotation_frame]
+	local sprite_rotations = world.tilemaps[world.state.building_type].tiles.rotation[direction]
+	local current_rotation = sprite_rotations[current_rotation_frame]
+	
 	return sprite_rotations, current_rotation
 end
 
@@ -25,13 +31,11 @@ local function set_cursor_position(self)
 	local position = self.position
 
 	if world.state.is_building then
-		local rotation_pools, current_rotation = get_rotation_frame(self, world.state.rotation_pool)
+		local sprite_rotations, current_rotation = get_rotation_frame(self)
 		local current_tilemap = world.tilemaps[world.state.building_type]
 		
 		-- if no connections
-		
-		local current_rotation_pool = current_tilemap.tiles.rotation[world.state.direction][current_rotation]
-		local sprite_animation = current_rotation_pool.direction .. "_" .. current_rotation_pool.direction_start
+		local sprite_animation = current_rotation.direction .. "_" .. current_rotation.direction_start
 
 		go.set("#sprite", "image", self[world.state.building_type])
 		msg.post("#sprite", "play_animation", {id = hash(sprite_animation)})
@@ -56,16 +60,13 @@ local function build_on_cursor(self)
 
 	local short_tilemap = world.tilemaps[world.state.building_type]
 	local layer = world.state.building_layer
-	local tilemap_rotations = short_tilemap.tiles.rotation[world.state.direction][world.state.rotation_pool]
-	local current_rotation = tilemap_rotations[world.state.rotation_frame]
+	local sprite_rotations, current_rotation = get_rotation_frame(self)
 
 	local current_cell = short_tilemap.grid[layer][self.position_tile.x][self.position_tile.y]
-
-	local current_rotation_pool = short_tilemap.tiles.rotation[world.state.direction][current_rotation]
 	
-	current_cell.tile = short_tilemap.tiles[current_rotation_pool.direction][current_rotation_pool.direction_start].start
-	current_cell.direction.start = current_rotation_pool.direction_start
-	current_cell.direction.finish = current_rotation_pool.direction
+	current_cell.tile = short_tilemap.tiles[current_rotation.direction][current_rotation.direction_start].start
+	current_cell.direction.start = current_rotation.direction_start
+	current_cell.direction.finish = current_rotation.direction
 	current_cell.is_destroyable = short_tilemap.is_destroyable
 	current_cell.is_targetable = short_tilemap.is_targetable
 	current_cell.is_showing_cursor = short_tilemap.is_showing_cursor
@@ -76,13 +77,11 @@ local function rotate_on_cursor(self)
 	if not world.state.is_building then return end
 
 	local direction = world.state.direction
-	local sprite_rotations = world.tilemaps[world.state.building_type].tiles.rotation[direction][world.state.rotation_pool]
-	local last_rotation_frame = table.maxn(sprite_rotations)
-	local current_rotation = sprite_rotations[world.state.rotation_frame]
+	local sprite_rotations, current_rotation = get_rotation_frame(self)
+	local last_rotation_frame = 8
 
-	local current_tilemap = world.tilemaps[world.state.building_type]
-	local current_rotation_pool = current_tilemap.tiles.rotation[world.state.direction][current_rotation]
-	local sprite_animation = current_rotation_pool.direction .. "_" .. current_rotation_pool.direction_start
+	local short_tilemap = world.tilemaps[world.state.building_type]
+	local sprite_animation = current_rotation.direction .. "_" .. current_rotation.direction_start
 
 	if not world.state.is_flipping then
 		if world.state.rotation_frame == last_rotation_frame then
@@ -159,10 +158,13 @@ function on_input(self, action_id, action)
 			world.state.is_building = true
 			world.state.building_type = world.TILEMAPS_TRANSPORTATION_BELT_YELLOW
 			world.state.building_layer = "belts"
-			world.state.rotation = 1
-			
-			local tilemap_rotations = world.get_available_connections(world.state.building_type, world.state.direction)
-			print(tilemap_rotations)
+			world.state.rotation_pool = world.get_available_rotations(world.state.building_type, world.state.direction)
+
+			if world.state.rotation_frame > #world.state.rotation_pool then
+				world.state.rotation_frame = 1 
+			elseif world.state.rotation_frame < 1 then
+				world.state.rotation_frame = #world.state.rotation_pool
+			end
 		end
 	end
 
@@ -184,6 +186,8 @@ function on_input(self, action_id, action)
 				world.state.direction = "right"
 			end
 		end
+
+		set_rotation_pool(self)
 		rotate_on_cursor(self)
 	end
 

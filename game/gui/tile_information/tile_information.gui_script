@@ -30,6 +30,7 @@ function on_message(self, message_id, message, sender)
 			"\n  building_type = " .. world.state.building_type .. 
 			"\n  rotation_frame = " .. tostring(world.state.rotation_frame) ..
 			"\n  direction = " .. tostring(world.state.direction) ..
+			"\n  rotation_pool = " .. tostring(world.state.rotation_pool[world.state.rotation_frame]) ..
 			"\n}"
 		gui.set_text(node, text)
 	end

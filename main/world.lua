@@ -31,7 +31,7 @@ M.state = {
 	building_type = "none",
 	building_layer = "none",
 	rotation_frame = 1,
-	rotation_pool = M.ROTATION_ORDER_START,
+	rotation_pool = "up",
 	direction = "right",
 }
 
@@ -186,7 +186,25 @@ function M.tile_information(tile)
 end
 
 function M.get_available_connections(the_map, direction)
-	return M.tilemaps[the_map].tiles[direction]
+	local rotations = M.tilemaps[the_map].tiles[direction]
+	local keyset = {}
+	
+	for k, _ in pairs(rotations) do
+		table.insert(keyset, k)
+	end
+
+	return keyset
+end
+
+function M.get_available_rotations(the_map, direction)
+	local rotations = M.tilemaps[the_map].tiles.rotation[direction]
+	local keyset = {}
+
+	for k, _ in pairs(rotations) do
+		table.insert(keyset, k)
+	end
+
+	return keyset
 end
 
 function M.set_tiles_building_grid()
