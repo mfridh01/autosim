@@ -98,8 +98,8 @@ animations {
 }
 animations {
   id: "up_left"
-  start_tile: 37
-  end_tile: 37
+  start_tile: 13
+  end_tile: 16
   playback: PLAYBACK_NONE
   fps: 30
   flip_horizontal: 0
@@ -107,8 +107,8 @@ animations {
 }
 animations {
   id: "up_right"
-  start_tile: 13
-  end_tile: 13
+  start_tile: 37
+  end_tile: 37
   playback: PLAYBACK_NONE
   fps: 30
   flip_horizontal: 0

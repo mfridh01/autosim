@@ -18,6 +18,15 @@ function update(self, dt)
 	-- Remove this function if not needed
 end
 
+local function get_rotation_pool_as_string()
+	local rotation_pool_string = ""
+	for _, v in ipairs(world.state.rotation_pool) do
+		rotation_pool_string = rotation_pool_string .. v .. ", "
+	end
+
+	return rotation_pool_string
+end
+
 function on_message(self, message_id, message, sender)
 	if message_id == hash("update_tile_information") then
 		local node = gui.get_node(world.guis.tile_information.nodes.text.body)
@@ -30,7 +39,9 @@ function on_message(self, message_id, message, sender)
 			"\n  building_type = " .. world.state.building_type .. 
 			"\n  rotation_frame = " .. tostring(world.state.rotation_frame) ..
 			"\n  direction = " .. tostring(world.state.direction) ..
-			"\n  rotation_pool = " .. tostring(world.state.rotation_pool[world.state.rotation_frame]) ..
+			"\n  direction_start = " .. tostring(world.state.direction_start) ..
+			"\n  direction_finish = " .. tostring(world.state.direction_finish) ..
+			"\n  rotation_pool = " .. get_rotation_pool_as_string() ..
 			"\n}"
 		gui.set_text(node, text)
 	end

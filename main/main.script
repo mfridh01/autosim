@@ -35,12 +35,12 @@ local function set_cells(self, the_map)
 					if current_tile == 1 then direction = {start = "down", finish = "down"}
 					elseif current_tile == 5 then direction = {start = "down", finish = "left"}
 					elseif current_tile == 9 then direction = {start = "up", finish = "up"}
-					elseif current_tile == 13 then direction = {start = "right", finish = "up"}
+					elseif current_tile == 13 then direction = {start = "left", finish = "up"}
 					elseif current_tile == 17 then direction = {start = "right", finish = "right"}
 					elseif current_tile == 21 then direction = {start = "up", finish = "right"}
 					elseif current_tile == 25 then direction = {start = "left", finish = "left"}
 					elseif current_tile == 29 then direction = {start = "right", finish = "down"}
-					elseif current_tile == 37 then direction = {start = "left", finish = "up"}
+					elseif current_tile == 37 then direction = {start = "right", finish = "up"}
 					elseif current_tile == 45 then direction = {start = "down", finish = "right"}
 					elseif current_tile == 53 then direction = {start = "left", finish = "down"}
 					elseif current_tile == 61 then direction = {start = "up", finish = "left"}

@@ -30,9 +30,11 @@ M.state = {
 	is_flipping = false,
 	building_type = "none",
 	building_layer = "none",
-	rotation_frame = 1,
-	rotation_pool = "up",
 	direction = "right",
+	direction_start = "",
+	direction_finish = "",
+	rotation_frame = 1,
+	rotation_pool = {"up_up"}
 }
 
 M.guis = {
@@ -112,8 +114,8 @@ M.tilemaps = {
 		tiles = {
 			up = {
 				up		= {is_corner = false,	start = 9,	finish = 12},
-				right	= {is_corner = true,	start = 13,	finish = 16},
-				left 	= {is_corner = true,	start = 37,	finish = 40},
+				right	= {is_corner = true,	start = 37,	finish = 40},
+				left 	= {is_corner = true,	start = 13,	finish = 16},
 			},
 			right = {
 				right	= {is_corner = false,	start = 17,	finish = 20},
@@ -154,7 +156,7 @@ M.tilemaps = {
 					right_down 	= {is_corner = true,	direction = "right",	direction_start = "down"},
 					right_right = {is_corner = false, 	direction = "right",	direction_start = "right"},
 					up_left 	= {is_corner = true,	direction = "up",		direction_start = "left"},
-					no_connections = {"up_up", "left_left", "down_down", "right_right"},
+					no_connections = {"up_up", "right_right", "down_down", "left_left"},
 				},
 			},
 			animation = {
@@ -197,16 +199,7 @@ function M.get_available_connections(the_map, direction)
 end
 
 function M.get_available_rotations(the_map, direction)
-	local rotations = M.tilemaps[the_map].tiles.rotation[direction]
-	local keyset = {}
-
-	for k, _ in pairs(rotations) do
-		if k ~= "no_connection" then
-			table.insert(keyset, k)
-		end
-	end
-
-	return keyset
+	return M.tilemaps[the_map].tiles.rotation[direction].no_connections
 end
 
 function M.set_tiles_building_grid()

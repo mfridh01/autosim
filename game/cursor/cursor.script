@@ -7,22 +7,41 @@ local function get_tilemap(self, the_map)
 	return world.tilemaps[the_map]
 end
 
-local function set_rotation_pool(self, the_map)
-	if not world.state.is_building then return end
-
-	local connections = self.cell:get_connections()
-	print(connections)
-
-	world.state.rotation_pool = world.get_available_rotations(world.state.building_type, world.state.direction)
+local function set_rotation_frame(self)
+	world.state.rotation_frame = world.state.rotation_frame + 1
+	if world.state.rotation_frame > #world.state.rotation_pool then
+		world.state.rotation_frame = 1
+	elseif world.state.rotation_frame < 1 then
+		world.state.rotation_frame = #world.state.rotation_pool
+	end
 end
 
 local function get_rotation_frame(self)
 	local direction = world.state.direction
 	local current_rotation_frame = world.state.rotation_pool[world.state.rotation_frame]
-	local sprite_rotations = world.tilemaps[world.state.building_type].tiles.rotation[direction]
-	local current_rotation = sprite_rotations[current_rotation_frame]
+
+	local direction_finish, direction_start = string.match(current_rotation_frame, "(.*)%_(.*)")	
+	local sprite_rotations = world.tilemaps[world.state.building_type].tiles
+	local current_rotation = sprite_rotations[direction_finish][direction_start]
+
+	world.state.direction_start = direction_start
+	world.state.direction_finish = direction_finish
 	
 	return sprite_rotations, current_rotation
+end
+
+local function set_rotation_pool(self, the_map)
+	if not world.state.is_building then return end
+	
+	local connections = self.cell:get_rotation_pool(self.cell:get_neighbors())
+
+	if #connections > 0 then
+		world.state.rotation_pool = connections
+		return
+	end
+
+	local current_rotations = world.tilemaps[world.state.building_type].tiles.rotation[world.state.direction].no_connections
+	world.state.rotation_pool = current_rotations
 end
 
 local function get_tile_information(self)
@@ -39,7 +58,9 @@ local function set_cursor_position(self)
 		local current_tilemap = world.tilemaps[world.state.building_type]
 		
 		-- if no connections
-		local sprite_animation = current_rotation.direction .. "_" .. current_rotation.direction_start
+		local sprite_animation = world.state.rotation_pool[world.state.rotation_frame]
+
+		
 
 		go.set("#sprite", "image", self[world.state.building_type])
 		msg.post("#sprite", "play_animation", {id = hash(sprite_animation)})
@@ -68,9 +89,9 @@ local function build_on_cursor(self)
 
 	local current_cell = short_tilemap.grid[layer][self.position_tile.x][self.position_tile.y]
 	
-	current_cell.tile = short_tilemap.tiles[current_rotation.direction][current_rotation.direction_start].start
-	current_cell.direction.start = current_rotation.direction_start
-	current_cell.direction.finish = current_rotation.direction
+	current_cell.tile = short_tilemap.tiles[world.state.direction_finish][world.state.direction_start]
+	current_cell.direction.start = world.state.direction_start
+	current_cell.direction.finish = world.state.direction_finish
 	current_cell.is_destroyable = short_tilemap.is_destroyable
 	current_cell.is_targetable = short_tilemap.is_targetable
 	current_cell.is_showing_cursor = short_tilemap.is_showing_cursor
@@ -80,22 +101,13 @@ end
 local function rotate_on_cursor(self)
 	if not world.state.is_building then return end
 
-	local direction = world.state.direction
-	local sprite_rotations, current_rotation = get_rotation_frame(self)
-	local last_rotation_frame = 8
-
+	local last_rotation_frame = #world.state.rotation_pool
 	local short_tilemap = world.tilemaps[world.state.building_type]
-	local sprite_animation = current_rotation.direction .. "_" .. current_rotation.direction_start
 
-	if not world.state.is_flipping then
-		if world.state.rotation_frame == last_rotation_frame then
-			world.state.rotation_frame = 1
-		else
-			world.state.rotation_frame = world.state.rotation_frame + 1
-		end
-	end
+	-- If we want to be able to rotate to the other way, here is the place to input that.
+	set_rotation_frame(self)
 
-	
+	local sprite_animation = world.state.rotation_pool[world.state.rotation_frame]
 	msg.post("#sprite", "play_animation", {id = hash(sprite_animation)})
 end
 
@@ -146,6 +158,14 @@ function on_input(self, action_id, action)
 		end
 	end
 
+	if action_id == hash(world.FLIP) then
+		if action.pressed then
+			world.state.is_flipping = true
+		elseif action.released then
+			world.state.is_flipping = false
+		end
+	end
+
 	if action_id == hash(world.MOUSE_LEFT_BUTTON) then 
 		if action.pressed then
 			world.state.is_dragging = true
@@ -155,7 +175,16 @@ function on_input(self, action_id, action)
 		end
 	end
 
-	if action_id == hash(world.BUILD_BELT) and action.pressed then
+	if action_id == hash(world.ROTATE) and action.pressed then
+		if world.state.is_flipping then
+			world.state.direction = "left"
+		else
+			world.state.direction = "right"
+		end
+
+		set_rotation_pool(self)
+		rotate_on_cursor(self)
+	elseif action_id == hash(world.BUILD_BELT) and action.pressed then
 		if world.state.is_building then
 			clear_all_actions(self)
 		else
@@ -163,34 +192,7 @@ function on_input(self, action_id, action)
 			world.state.building_type = world.TILEMAPS_TRANSPORTATION_BELT_YELLOW
 			world.state.building_layer = "belts"
 			world.state.rotation_pool = world.get_available_rotations(world.state.building_type, world.state.direction)
-
-			if world.state.rotation_frame > #world.state.rotation_pool then
-				world.state.rotation_frame = 1 
-			elseif world.state.rotation_frame < 1 then
-				world.state.rotation_frame = #world.state.rotation_pool
-			end
 		end
-	end
-
-	if action_id == hash(world.FLIP) then
-		if action.pressed then
-			world.state.is_flipping = true
-		elseif action.released then
-			world.state.is_flipping = false
-		end
-	end
-
-	if action_id == hash(world.ROTATE) and action.pressed then
-		if world.state.is_flipping then
-			if world.state.direction == "right" then
-				world.state.direction = "left"
-			elseif world.state.direction == "left" then
-				world.state.direction = "right"
-			end
-		end
-
-		set_rotation_pool(self)
-		rotate_on_cursor(self)
 	end
 
 	if action_id == hash(world.CLEAR_ALL_ACTIONS) then
