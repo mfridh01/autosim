@@ -15,7 +15,6 @@ local function set_tilemap(self, the_map)
 end
 
 local function set_cells(self, the_map)
-	print("Setting cells")
 	local short_tilemap = world.tilemaps[the_map]
 
 	for tilemap_layer in pairs(short_tilemap.layers) do
@@ -55,7 +54,6 @@ local function set_cells(self, the_map)
 end
 
 local function set_animation_tiles(self, the_map)
-	print("Setting animation tiles")
 	local short_tilemap = world.tilemaps[the_map]
 
 	for layer in pairs(short_tilemap.grid) do

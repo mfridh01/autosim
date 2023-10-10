@@ -7,9 +7,13 @@ local function get_tilemap(self, the_map)
 	return world.tilemaps[the_map]
 end
 
-local function set_rotation_pool(self)
+local function set_rotation_pool(self, the_map)
+	if not world.state.is_building then return end
+
+	local connections = self.cell:get_connections()
+	print(connections)
+
 	world.state.rotation_pool = world.get_available_rotations(world.state.building_type, world.state.direction)
-	pprint(world.state.rotation_pool)
 end
 
 local function get_rotation_frame(self)
@@ -177,8 +181,6 @@ function on_input(self, action_id, action)
 	end
 
 	if action_id == hash(world.ROTATE) and action.pressed then
-		local is_corner = get_rotation_frame(self, world.state.rotation_pool).is_corner
-		
 		if world.state.is_flipping then
 			if world.state.direction == "right" then
 				world.state.direction = "left"

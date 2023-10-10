@@ -135,7 +135,6 @@ M.tilemaps = {
 			},
 			rotation = {
 				right = {
-					--rotation_order_start = {"up_up", "right_up", "right_right", "down_right", "down_down", "left_down", "left_left", "up_right"},
 					up_up		= {is_corner = false,	direction = "up",		direction_start = "up"},
 					right_up	= {is_corner = true,	direction = "right",	direction_start = "up"},
 					right_right = {is_corner = false,	direction = "right",	direction_start = "right"},
@@ -144,9 +143,9 @@ M.tilemaps = {
 					left_down	= {is_corner = true,	direction = "left",		direction_start = "down"},
 					left_left	= {is_corner = false,	direction = "left",		direction_start = "left"},
 					up_right	= {is_corner = true,	direction = "up",		direction_start = "right"},
+					no_connections = {"up_up", "right_right", "down_down", "left_left"},
 				},
 				left = {
-					--rotation_order_start = {"up_up", "left_up", "left_left", "down_left", "down_down", "right_down", "right_right", "up_left"},
 					up_up 		= {is_corner = false,	direction = "up",		direction_start = "up"},
 					left_up 	= {is_corner = true,	direction = "left",		direction_start = "up"},
 					left_left	= {is_corner = false,	direction = "left",		direction_start = "left"},
@@ -155,6 +154,7 @@ M.tilemaps = {
 					right_down 	= {is_corner = true,	direction = "right",	direction_start = "down"},
 					right_right = {is_corner = false, 	direction = "right",	direction_start = "right"},
 					up_left 	= {is_corner = true,	direction = "up",		direction_start = "left"},
+					no_connections = {"up_up", "left_left", "down_down", "right_right"},
 				},
 			},
 			animation = {
@@ -201,7 +201,9 @@ function M.get_available_rotations(the_map, direction)
 	local keyset = {}
 
 	for k, _ in pairs(rotations) do
-		table.insert(keyset, k)
+		if k ~= "no_connection" then
+			table.insert(keyset, k)
+		end
 	end
 
 	return keyset
@@ -213,6 +215,21 @@ end
 
 function M.world_to_tile(position, tile_size)
 	return vmath.vector3(math.ceil(position.x / tile_size), math.ceil(position.y / tile_size), 0)
+end
+
+function M.is_tile_on_grid(cell, building_type)
+	local current_tilemap = M.tilemaps[building_type]
+	local current_grid = current_tilemap.grid[current_tilemap.layers[1]]
+-- 	
+-- 	if cell.position.x < current_tilemap.size.x or cell.position.x > #current_grid or
+-- 	cell.position.y < current_tilemap.size.y or cell.position.y > #current_grid[1] then
+-- 		return false
+-- 	end
+-- 
+-- 	return true
+
+	if not current_grid[cell.x][cell.y] then return false end
+	return true
 end
 
 return M
