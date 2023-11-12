@@ -30,6 +30,11 @@ local function set_cells(self, the_map)
 				local is_targetable = short_tilemap.is_targetable
 				local is_showing_cursor = short_tilemap.is_showing_cursor
 				local is_destroyable = false
+				local type_info = {
+					type = world.NORMAL,
+					input = {},
+					output = {},
+				}
 
 				if layer == "belts" then
 					if current_tile == 1 then direction = {start = "down", finish = "down"}
@@ -44,11 +49,453 @@ local function set_cells(self, the_map)
 					elseif current_tile == 45 then direction = {start = "down", finish = "right"}
 					elseif current_tile == 53 then direction = {start = "left", finish = "down"}
 					elseif current_tile == 61 then direction = {start = "up", finish = "left"}
+
+					-- SPLIT
+					elseif current_tile == 65 then
+						direction = {start = "down_right_down_left", finish = "split"}
+						type_info = {
+							type = world.SPLITTER,
+							input = {
+								directions = {"up"},
+								next = "up",
+							},
+							output = {
+								directions = {"right", "down", "left"},
+								next = "right",
+							},
+						}
+					elseif current_tile == 73 then
+						direction = {start = "down_right_down", finish = "split"}
+						type_info = {
+							type = world.SPLITTER,
+							input = {
+								directions = {"up"},
+								next = "up",
+							},
+							output = {
+								directions = {"right", "down"},
+								next = "right",
+							},
+						}
+					elseif current_tile == 81 then
+						direction = {start = "down_down_left", finish = "split"}
+						type_info = {
+							type = world.SPLITTER,
+							input = {
+								directions = {"up"},
+								next = "up",
+							},
+							output = {
+								directions = {"down", "left"},
+								next = "down",
+							},
+						}
+					elseif current_tile == 89 then
+						direction = {start = "down_right_left", finish = "split"}
+						type_info = {
+							type = world.SPLITTER,
+							input = {
+								directions = {"up"},
+								next = "up",
+							},
+							output = {
+								directions = {"right", "left"},
+								next = "right",
+							},
+						}
+					elseif current_tile == 97 then
+						direction = {start = "down_down", finish = "split"}
+						type_info = {
+							type = world.SPLITTER,
+							input = {
+								directions = {"up"},
+								next = "up",
+							},
+							output = {
+								directions = {"down"},
+								next = "down",
+							},
+						}
+					elseif current_tile == 105 then
+						direction = {start = "down_right", finish = "split"}
+						type_info = {
+							type = world.SPLITTER,
+							input = {
+								directions = {"up"},
+								next = "up",
+							},
+							output = {
+								directions = {"right"},
+								next = "right",
+							},
+						}
+					elseif current_tile == 113 then
+						direction = {start = "down_left", finish = "split"}
+						type_info = {
+							type = world.SPLITTER,
+							input = {
+								directions = {"up"},
+								next = "up",
+							},
+							output = {
+								directions = {"left"},
+								next = "left",
+							},
+						}
+					elseif current_tile == 121 then
+						direction = {start = "down_none", finish = "split"}
+						type_info = {
+							type = world.SPLITTER,
+							input = {
+								directions = {"up"},
+								next = "up",
+							},
+							output = {
+								directions = {},
+								next = "",
+							},
+						}
+					elseif current_tile == 125 then
+						direction = {start = "none_none", finish = "split"}
+						type_info = {
+							type = world.SPLITTER,
+							input = {
+								directions = {},
+								next = "",
+							},
+							output = {
+								directions = {},
+								next = "",
+							},
+						}
+					elseif current_tile == 69 then
+						direction = {start = "none_right_down_left", finish = "split"}
+						type_info = {
+							type = world.SPLITTER,
+							input = {
+								directions = {},
+								next = "",
+							},
+							output = {
+								directions = {"right", "down", "left"},
+								next = "right",
+							},
+						}
+					elseif current_tile == 77 then
+						direction = {start = "none_right_down", finish = "split"}
+						type_info = {
+							type = world.SPLITTER,
+							input = {
+								directions = {},
+								next = "",
+							},
+							output = {
+								directions = {"right", "down"},
+								next = "right",
+							},
+						}
+					elseif current_tile == 85 then
+						direction = {start = "none_down_left", finish = "split"}
+						type_info = {
+							type = world.SPLITTER,
+							input = {
+								directions = {},
+								next = "",
+							},
+							output = {
+								directions = {"down", "left"},
+								next = "down",
+							},
+						}
+					elseif current_tile == 93 then
+						direction = {start = "none_right_left", finish = "split"}
+						type_info = {
+							type = world.SPLITTER,
+							input = {
+								directions = {},
+								next = "",
+							},
+							output = {
+								directions = {"right", "left"},
+								next = "right",
+							},
+						}
+					elseif current_tile == 101 then
+						direction = {start = "none_down", finish = "split"}
+						type_info = {
+							type = world.SPLITTER,
+							input = {
+								directions = {},
+								next = "",
+							},
+							output = {
+								directions = {"down"},
+								next = "down",
+							},
+						}
+					elseif current_tile == 109 then
+						direction = {start = "none_right", finish = "split"}
+						type_info = {
+							type = world.SPLITTER,
+							input = {
+								directions = {},
+								next = "",
+							},
+							output = {
+								directions = {"right"},
+								next = "right",
+							},
+						}
+					elseif current_tile == 117 then
+						direction = {start = "none_left", finish = "split"}
+						type_info = {
+							type = world.SPLITTER,
+							input = {
+								directions = {},
+								next = "",
+							},
+							output = {
+								directions = {"left"},
+								next = "left",
+							},
+						}
+
+					-- MERGE
+					elseif current_tile == 129 then
+						direction = {start = "down_right_down_left", finish = "merge"}
+						type_info = {
+							type = world.MERGER,
+							input = {
+								directions = {"right", "down", "left"},
+								next = "right",
+							},
+							output = {
+								directions = {"down"},
+								next = "down",
+							},
+						}
+					elseif current_tile == 137 then
+						direction = {start = "down_right_down", finish = "merge"}
+						type_info = {
+							type = world.MERGER,
+							input = {
+								directions = {"right", "down"},
+								next = "right",
+							},
+							output = {
+								directions = {"down"},
+								next = "down",
+							},
+						}
+					elseif current_tile == 145 then
+						direction = {start = "down_down_left", finish = "merge"}
+						type_info = {
+							type = world.MERGER,
+							input = {
+								directions = {"down", "left"},
+								next = "down",
+							},
+							output = {
+								directions = {"down"},
+								next = "down",
+							},
+						}
+					elseif current_tile == 153 then
+						direction = {start = "down_right_left", finish = "merge"}
+						type_info = {
+							type = world.MERGER,
+							input = {
+								directions = {"right", "left"},
+								next = "right",
+							},
+							output = {
+								directions = {"down"},
+								next = "down",
+							},
+						}
+					elseif current_tile == 161 then
+						direction = {start = "down_down", finish = "merge"}
+						type_info = {
+							type = world.MERGER,
+							input = {
+								directions = {"down"},
+								next = "down",
+							},
+							output = {
+								directions = {"down"},
+								next = "down",
+							},
+						}
+					elseif current_tile == 169 then
+						direction = {start = "down_right", finish = "merge"}
+						type_info = {
+							type = world.MERGER,
+							input = {
+								directions = {"right"},
+								next = "right",
+							},
+							output = {
+								directions = {"down"},
+								next = "down",
+							},
+						}
+					elseif current_tile == 177 then
+						direction = {start = "down_left", finish = "merge"}
+						type_info = {
+							type = world.MERGER,
+							input = {
+								directions = {"left"},
+								next = "left",
+							},
+							output = {
+								directions = {"down"},
+								next = "down",
+							},
+						}
+					elseif current_tile == 185 then
+						direction = {start = "down_none", finish = "merge"}
+						type_info = {
+							type = world.MERGER,
+							input = {
+								directions = {},
+								next = "",
+							},
+							output = {
+								directions = {"down"},
+								next = "down",
+							},
+						}
+					elseif current_tile == 189 then
+						direction = {start = "none_none", finish = "merge"}
+						type_info = {
+							type = world.MERGER,
+							input = {
+								directions = {},
+								next = "",
+							},
+							output = {
+								directions = {},
+								next = "",
+							},
+						}
+					elseif current_tile == 133 then
+						direction = {start = "none_right_down_left", finish = "merge"}
+						type_info = {
+							type = world.MERGER,
+							input = {
+								directions = {"right", "down", "left"},
+								next = "right",
+							},
+							output = {
+								directions = {},
+								next = "",
+							},
+						}
+					elseif current_tile == 141 then
+						direction = {start = "none_right_down", finish = "merge"}
+						type_info = {
+							type = world.MERGER,
+							input = {
+								directions = {"right", "down"},
+								next = "right",
+							},
+							output = {
+								directions = {},
+								next = "",
+							},
+						}
+					elseif current_tile == 149 then
+						direction = {start = "none_down_left", finish = "merge"}
+						type_info = {
+							type = world.MERGER,
+							input = {
+								directions = {"down", "left"},
+								next = "down",
+							},
+							output = {
+								directions = {},
+								next = "",
+							},
+						}
+					elseif current_tile == 157 then
+						direction = {start = "none_right_left", finish = "merge"}
+						type_info = {
+							type = world.MERGER,
+							input = {
+								directions = {"right", "left"},
+								next = "right",
+							},
+							output = {
+								directions = {},
+								next = "",
+							},
+						}
+					elseif current_tile == 165 then
+						direction = {start = "none_down", finish = "merge"}
+						type_info = {
+							type = world.MERGER,
+							input = {
+								directions = {"down"},
+								next = "down",
+							},
+							output = {
+								directions = {},
+								next = "",
+							},
+						}
+					elseif current_tile == 173 then
+						direction = {start = "none_right", finish = "merge"}
+						type_info = {
+							type = world.MERGER,
+							input = {
+								directions = {"right"},
+								next = "right",
+							},
+							output = {
+								directions = {},
+								next = "",
+							},
+						}
+					elseif current_tile == 181 then
+						direction = {start = "none_left", finish = "merge"}
+						type_info = {
+							type = world.MERGER,
+							input = {
+								directions = {"left"},
+								next = "left",
+							},
+							output = {
+								directions = {},
+								next = "",
+							},
+						}
 					end
 				end
 
-				short_tilemap.grid[layer][i][j] = cell.new(name, the_map, layer, current_tile, {start = direction.start, finish = direction.finish}, {x = i, y = j}, is_destroyable, is_targetable, is_showing_cursor)
+				short_tilemap.grid[layer][i][j] = cell.new(
+					name,
+					the_map,
+					layer,
+					current_tile,
+					{start = direction.start, finish = direction.finish},
+					{x = i, y = j},
+					is_destroyable,
+					is_targetable,
+					is_showing_cursor,
+					type_info
+				)
 			end
+		end
+	end
+end
+
+local function set_connections(self, the_map)
+	local short_tilemap = world.tilemaps[the_map]
+	for i = 1, #short_tilemap.grid[short_tilemap.layers[1]] do
+		for j = 1, #short_tilemap.grid[short_tilemap.layers[1]][i] do
+			local current_cell = short_tilemap.grid[short_tilemap.layers[1]][i][j]
+			current_cell:get_neighbors(the_map, short_tilemap.layers[1])
+			current_cell:set_connections(current_cell, the_map)
 		end
 	end
 end
@@ -80,6 +527,8 @@ function init(self)
 	set_cells(self, world.TILEMAPS_TRANSPORTATION_BELT_YELLOW)
 	
 	set_animation_tiles(self, world.TILEMAPS_TRANSPORTATION_BELT_YELLOW)
+
+	set_connections(self, world.TILEMAPS_TRANSPORTATION_BELT_YELLOW)
 
 	msg.post("/gui#loading_screen", "disable")
 end

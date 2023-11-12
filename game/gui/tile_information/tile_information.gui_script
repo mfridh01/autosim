@@ -29,14 +29,17 @@ end
 
 function on_message(self, message_id, message, sender)
 	if message_id == hash("update_tile_information") then
+		local building_type = message.tilemap
+		local cell = world.tilemaps[building_type].grid[message.layer][message.x][message.y]
+		
 		local node = gui.get_node(world.guis.tile_information.nodes.text.body)
-		local text = "Tile\nName:" .. message.name ..
-			"\nPosition: X=" .. message.position.x ..", Y=" .. message.position.y ..
-			"\nLayer: " .. message.layer ..
+		local text = "Tile\nName:" .. cell.name ..
+			"\nPosition: X=" .. cell.position.x ..", Y=" .. cell.position.y ..
+			"\nLayer: " .. cell.layer ..
 			"\nState: {\n  is_building = " .. tostring(world.state.is_building) .. 
 			"\n  is_dragging = " .. tostring(world.state.is_dragging) ..
 			"\n  is_flipping = " .. tostring(world.state.is_flipping) ..
-			"\n  building_type = " .. world.state.building_type .. 
+			"\n  building_type = " .. tostring(world.state.building_type) .. 
 			"\n  rotation_frame = " .. tostring(world.state.rotation_frame) ..
 			"\n  direction = " .. tostring(world.state.direction) ..
 			"\n  direction_start = " .. tostring(world.state.direction_start) ..

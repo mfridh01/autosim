@@ -16,6 +16,11 @@ M.FLIP = "flip"
 M.CLEAR_ALL_ACTIONS = "clear_all_actions"
 M.MOUSE_LEFT_BUTTON = "mouse_left_button"
 
+-- Tile types
+M.NORMAL = "normal"
+M.SPLITTER = "splitter"
+M.MERGERR = "merger"
+
 -- Rotation pools
 M.ROTATION_ORDER_START = "rotation_order_start"
 
@@ -134,6 +139,45 @@ M.tilemaps = {
 			},
 			none = {
 				none 	= {start = 0,	finish = 0},
+				split	= {start = 89,	finish = 92},
+			},
+			split = {
+				down_right_down_left = {is_corner = false, start = 65, finish = 68},
+				down_right_down = {is_corner = false, start = 73, finish = 76},
+				down_down_left = {is_corner = false, start = 81, finish = 84},
+				down_right_left = {is_corner = false, start = 89, finish = 92},
+				down_down = {is_corner = false, start = 97, finish = 100},
+				down_right = {is_corner = false, start = 105, finish = 108},
+				down_left = {is_corner = false, start = 113, finish = 116},
+				down_none = {is_corner = false, start = 121, finish = 124},
+				none_none = {is_corner = false, start = 125, finish = 128},
+
+				none_right_down_left = {is_corner = false, start = 69, finish = 72},
+				none_right_down = {is_corner = false, start = 77, finish = 80},
+				none_down_left = {is_corner = false, start = 85, finish = 88},
+				none_right_left = {is_corner = false, start = 93, finish = 96},
+				none_down = {is_corner = false, start = 101, finish = 104},
+				none_right = {is_corner = false, start = 109, finish = 112},
+				none_left = {is_corner = false, start = 117, finish = 120},
+			},
+			merge = {
+				down_right_down_left = {is_corner = false, start = 129, finish = 132},
+				down_right_down = {is_corner = false, start = 137, finish = 140},
+				down_down_left = {is_corner = false, start = 145, finish = 148},
+				down_right_left = {is_corner = false, start = 153, finish = 156},
+				down_down = {is_corner = false, start = 161, finish = 164},
+				down_right = {is_corner = false, start = 169, finish = 172},
+				down_left = {is_corner = false, start = 177, finish = 180},
+				down_none = {is_corner = false, start = 185, finish = 188},
+				none_none = {is_corner = false, start = 189, finish = 192},
+
+				none_right_down_left = {is_corner = false, start = 133, finish = 136},
+				none_right_down = {is_corner = false, start = 141, finish = 144},
+				none_down_left = {is_corner = false, start = 149, finish = 152},
+				none_right_left = {is_corner = false, start = 157, finish = 160},
+				none_down = {is_corner = false, start = 165, finish = 168},
+				none_right = {is_corner = false, start = 173, finish = 176},
+				none_left = {is_corner = false, start = 181, finish = 184},
 			},
 			rotation = {
 				right = {
@@ -158,6 +202,16 @@ M.tilemaps = {
 					up_left 	= {is_corner = true,	direction = "up",		direction_start = "left"},
 					no_connections = {"up_up", "right_right", "down_down", "left_left"},
 				},
+				split = {
+					down_right_down_left = {is_corner = false, direction = "right_down_left", direction_start = "down"},
+					down_right_down = {is_corner = false, direction = "right_down", direction_start = "down"},
+					down_down_left = {is_corner = false, direction = "down_left", direction_start = "down"},
+					down_right = {is_corner = false, direction = "right", direction_start = "down"},
+					down_down = {is_corner = false, direction = "down", direction_start = "down"},
+					down_left = {is_corner = false, direction = "left", direction_start = "down"},
+					down = {is_corner = false, direction = "none", direction_start = "down"},
+					none = {is_corner = false, direction = "none", direction_start = "none"},
+				}
 			},
 			animation = {
 				frame_current = 1,
@@ -171,6 +225,8 @@ M.tilemaps = {
 }
 
 function M.tile_information(tile)
+	if not tile then return end
+
 	-- Get all tilemaps in order.
 	for _, tilemap_order in pairs(M.TILEMAP_ORDER) do
 		local short_tilemap = M.tilemaps[tilemap_order]

@@ -32,8 +32,8 @@ end
 
 local function set_rotation_pool(self, the_map)
 	if not world.state.is_building then return end
-	
-	local connections = self.cell:get_rotation_pool(self.cell:get_neighbors())
+
+	local connections = self.cell:get_rotation_pool(self.cell:get_neighbors(the_map))
 
 	if #connections > 0 then
 		world.state.rotation_pool = connections
@@ -46,21 +46,19 @@ end
 
 local function get_tile_information(self)
 	self.cell = world.tile_information(self.position_tile)
-	msg.post(world.guis.tile_information.url, "update_tile_information", self.cell)
+	msg.post(world.guis.tile_information.url, "update_tile_information", {x = self.cell.position.x, y = self.cell.position.y, tilemap = self.cell.tilemap, layer = self.cell.layer})
 end
 
 local function set_cursor_position(self)
-	get_tile_information(self)
 	local position = self.position
 
 	if world.state.is_building then
 		local sprite_rotations, current_rotation = get_rotation_frame(self)
 		local current_tilemap = world.tilemaps[world.state.building_type]
-		
-		-- if no connections
 		local sprite_animation = world.state.rotation_pool[world.state.rotation_frame]
 
-		
+		-- if connections
+		if #self.cell.connections > 0 then print("ggot connections") end
 
 		go.set("#sprite", "image", self[world.state.building_type])
 		msg.post("#sprite", "play_animation", {id = hash(sprite_animation)})
@@ -96,6 +94,8 @@ local function build_on_cursor(self)
 	current_cell.is_targetable = short_tilemap.is_targetable
 	current_cell.is_showing_cursor = short_tilemap.is_showing_cursor
 	current_cell:set_animation_tiles()
+	current_cell:get_neighbors(current_cell.tilemap, current_cell.layer)
+	current_cell:set_connections(current_cell, current_cell.tilemap)
 end
 
 local function rotate_on_cursor(self)
@@ -114,10 +114,15 @@ end
 function init(self)
 	msg.post(".", "acquire_input_focus")
 	self.hidden = vmath.vector3(-40, -40, 0)
-	self.position_tile = vmath.vector3(-1, -1, 0)
+	self.position_tile = vmath.vector3(1, 1, 0)
 	self.new_position_tile = self.position_tile
 	self.position = vmath.vector3(0, 0, 0)
-	self.cell = {}
+	self.cell = {
+		position = {
+			x = 1,
+			y = 1,
+		}
+	}
 	self.is_building = false
 end
 
@@ -152,10 +157,15 @@ function on_input(self, action_id, action)
 		local pos = vmath.vector3(action.x, action.y, 0)
 		self.new_position_tile = world.world_to_tile(pos, 32)
 
+		self.cell.position.x = self.position_tile.x
+		self.cell.position.y = self.position_tile.y
+		
 		if self.new_position_tile ~= self.position_tile then
 			self.position = vmath.vector3(((self.new_position_tile.x - 1) * 32) + (32 / 2), ((self.new_position_tile.y - 1) * 32) + (32 / 2), 0)
 			self.position_tile = self.new_position_tile
 		end
+
+		get_tile_information(self)
 	end
 
 	if action_id == hash(world.FLIP) then
